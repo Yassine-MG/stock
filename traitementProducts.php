@@ -36,8 +36,53 @@ if(isset($_REQUEST["newProduct"])) {
 }
 
 
-// FETCHER LES DATA DES PRODUCTS A PARTIR DE LA BASE DE DONNEE POUR AFFICHER SUR LA PAGE (LIST)
+// DELETING A PRODUCT FROM THE LIST
+if (isset($_REQUEST["deleteProduct"])) {
+    $sql = "Delete from products where product_id = :product_id;";
+
+    $params = [
+        "product_id" => $_REQUEST["deleteProduct"]
+    ];
+    $stmt = $conn->prepare($sql);
+    if ($stmt->execute($params)) {
+        $_SESSION["success"] = "Product deleted successfully";
+        header("location:./products.php");
+    } else {
+        $_SESSION["error"] = "Product deletion successfully failed";
+        header("location:./products.php");
+    }
+}
 
 
+if(isset($_REQUEST["modifyProduct"])){
+    $label = getInput("label");
+    $description = getInput("description",false);
+    $price = getInput("price");
+    $quantity = getInput("quantity");
+    $product_id = getInput("product_id");
 
+
+    if($label == null || $price == null || $quantity == null){
+        header("location:./products.php");
+    }
+
+    $sql = "UPDATE products SET label = :label, description = :description, price = :price, quantity = :quantity ,user_id = :user_id WHERE product_id = :product_id";
+    $params = [
+        "label" => $label,
+        "description" => $description,
+        "quantity" => $quantity,
+        "price" => $price,
+        "user_id" => $_SESSION["fetchUser"]["id"],
+        "product_id" => $product_id
+    ];
+
+    $stmt = $conn->prepare($sql);
+    if($stmt->execute($params)){
+        $_SESSION["success"]= "Your product has been modified successfully";
+        header("location:./products.php");
+    }else{
+        $_SESSION["error"]= "Product modification successfully failed";
+        header("location:./products.php ");
+    }
+}
 ?>
